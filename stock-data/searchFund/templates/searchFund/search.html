@@ -1,0 +1,16 @@
+<h1>Búsqueda de fondo</h1>
+<form method="get">
+    <input type="text" name="query" placeholder="Ticker..." value="{{ query }}">
+    <button type="submit">Buscar</button>
+</form>
+
+{% if fund_data %}
+    <h2>Resultados para "{{ fund_data.symbol }}"</h2>
+    <ul>
+        {% for key, value in fund_data.items %}
+            <li><strong>{{ key }}:</strong> {{ value }}</li>
+        {% endfor %}
+    </ul>
+{% elif query %}
+    <p>No se encontraron resultados para "{{ query }}"</p>
+{% endif %}
