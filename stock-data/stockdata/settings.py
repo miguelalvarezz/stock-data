@@ -124,3 +124,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# API Keys
+API_KEYS = {
+    'FMP': 'KUBCXvDtFkdkVMZCz5uiADPACl3o9Ww5',
+    'EODHD': '681e36ad9fc1c6.01217233',
+    'ALPHA_VANTAGE': 'TSZP1J022SY5DL5D'
+}

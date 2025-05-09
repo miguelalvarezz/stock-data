@@ -1,5 +1,10 @@
 import yfinance as yf
 
+# API FMP (financial modeling prep) -> ratios de riesgo  y rentabilidad anual
+# API EODHD -> comisiones detalladas, dividendos y rendimientos
+# API Alpha Vantage -> precios historicos (backup si falla yf) e informacion volatilidad
+
+
 def search_fund_data(symbol):
     try:
         fund = yf.Ticker(symbol)
