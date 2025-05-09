@@ -1,0 +1,13 @@
+<h1>Comparar dos fondos</h1>
+<form method="get">
+    <input type="text" name="fund1" placeholder="Ticker 1" value="{{ fund1 }}">
+    <input type="text" name="fund2" placeholder="Ticker 2" value="{{ fund2 }}">
+    <button type="submit">Comparar</button>
+</form>
+
+{% if comparison_table %}
+    <h2>Comparación entre {{ fund1 }} y {{ fund2 }}</h2>
+    {{ comparison_table|safe }}
+{% elif fund1 and fund2 %}
+    <p>No se pudo realizar la comparación.</p>
+{% endif %}
