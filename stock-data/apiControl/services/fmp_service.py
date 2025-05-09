@@ -29,7 +29,13 @@ class FMPService:
             url = f"{self.base_url}/ratios/{symbol}?apikey={self.api_key}"
             response = requests.get(url)
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            if isinstance(data, list) and data:
+                return data[0]  # Tomar el más reciente
+            elif isinstance(data, dict):
+                return data
+            else:
+                return {}
         except Exception as e:
             # Log del error
             return {}

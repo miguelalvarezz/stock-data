@@ -18,8 +18,11 @@ class YFinanceService:
                 'name': info.get('longName'),
                 'sector': info.get('sector'),
                 'return1y': info.get('52WeekChange'),
-                'fees': info.get('annualReportExpenseRatio'),
+                'fees': info.get('expenseRatio'),
                 'benchmark': info.get('category'),
+                'price': info.get('regularMarketPrice'),
+                'change_percent': info.get('regularMarketChangePercent'),
+                'volume': info.get('regularMarketVolume'),
             }
         except Exception as e:
             # Log del error
