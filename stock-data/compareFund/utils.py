@@ -2,6 +2,10 @@ import yfinance as yf
 import pandas as pd
 from searchFund.utils import search_fund_data
 
+# API FMP (financial modeling prep) -> ratios de riesgo  y rentabilidad anual
+# API EODHD -> comisiones detalladas, dividendos y rendimientos
+# API Alpha Vantage -> precios historicos (backup si falla yf) e informacion volatilidad
+
 
 
 def compare_funds_data(f1, f2):
