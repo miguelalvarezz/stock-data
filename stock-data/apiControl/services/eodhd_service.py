@@ -8,7 +8,7 @@ class EODHDService:
         self.api_key = settings.EODHD_API_KEY
         self.base_url = "https://eodhd.com/api"
 
-    def search_funds(self, query: str) -> Dict[str, Any]:
+    def getSearchData(self, query: str) -> Dict[str, Any]:
         """
         Búsqueda de fondos (backup)
         """
@@ -16,7 +16,40 @@ class EODHDService:
             url = f"{self.base_url}/search/{query}?api_token={self.api_key}"
             response = requests.get(url)
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            
+            # Convertimos la respuesta al mismo formato que YFinance
+            formatted_results = []
+            for item in data:
+                formatted_item = {
+                    'symbol': item.get('Code', ''),
+                    'shortname': item.get('Name', ''),
+                    'longname': item.get('Name', ''),
+                    'exchange': item.get('Exchange', ''),
+                    'type': item.get('Type', ''),
+                    'score': item.get('Score', 0)
+                }
+                formatted_results.append(formatted_item)
+            return {
+                'quotes': formatted_results,
+                'count': len(formatted_results)
+            }
+        except Exception as e:
+            # Log del error
+            return {'quotes': [], 'count': 0}
+        
+    def getCategorySector(self, symbol: str) -> Dict[str, Any]:
+        # TODO: Implementar
+        return None
+    
+    def compare_funds(self, symbol1: str, symbol2: str) -> Dict[str, Any]:
+        """
+        Comparación de fondos (backup)
+        """
+        try:
+            url = f"{self.base_url}/compare/{symbol1},{symbol2}?api_token={self.api_key}"
+            response = requests.get(url)
+            response.raise_for_status()
         except Exception as e:
             # Log del error
             return {}

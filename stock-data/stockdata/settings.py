@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-*h2@h&kw3^934x0t6j6e#9e1v#%7p_445-av%3o=3hup*m8*9r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # 'GhFund.apps.SearchfundConfig',  # Comentado temporalmente
     'searchFund.apps.SearchfundConfig',
     'suggestedFund.apps.SuggestedfundConfig',
     'graphicFund.apps.GraphicfundConfig',
@@ -76,10 +77,27 @@ WSGI_APPLICATION = 'stockdata.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+'''
+
+#POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
+
+DATABASES = {
+    'default': {
+        #'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        #'PASSWORD': POSTGRES_PASSWORD,
+        'HOST': 'db',
+        'PORT': '5432',
     }
 }
 

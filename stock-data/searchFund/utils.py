@@ -1,8 +1,22 @@
 import yfinance as yf
 import pandas as pd
+from apiControl.control import perform_api_call
 import requests
 
 
+def search_fund_data(symbol):
+
+    print(f"[DEBUG] Iniciando búsqueda de {symbol}")
+    data1 = {}
+
+    try:
+        return perform_api_call("search", symbol)
+    except Exception as e:
+        print(f"[ERROR] Error en la búsqueda: {str(e)}")
+        return None
+
+
+'''
 def search_fund_data(symbol):
     try:
         fund = yf.Ticker(symbol)
@@ -42,23 +56,17 @@ def search_fund_data(symbol):
         end_price = df.loc[end_date, 'Adj Close']
 
         # === 4. CALCULAR CAGR ===
-        cagr = (end_price / start_price) ** (1 / years) - 1
-
-
-
-
-
-
-
+        cagr = ((end_price / start_price) ** (1 / years) - 1) * 100
 
         return {
             'symbol': info.get('symbol'),
             'name': info.get('longName'),
             'sector': info.get('sector'),
             #'return1y': info.get('52WeekChange'),
-            'return1y': cagr * 100,
+            'return1y': cagr,
             'fees': info.get('annualReportExpenseRatio'),
             'benchmark': info.get('category'),
         }
     except:
         return None
+'''

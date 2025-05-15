@@ -1,13 +1,111 @@
-<h1>Comparar dos fondos</h1>
-<form method="get">
-    <input type="text" name="fund1" placeholder="Ticker 1" value="{{ fund1 }}">
-    <input type="text" name="fund2" placeholder="Ticker 2" value="{{ fund2 }}">
-    <button type="submit">Comparar</button>
-</form>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stockdata</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .alert {
+            animation: fadeIn 0.5s;
+            margin-top: 20px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .error-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        .fund-inputs {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        .fund-input-group {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4">Comparación de Fondos</h2>
+        
+        <!-- Formulario de comparación -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="GET" class="form-inline">
+                    <div class="fund-inputs">
+                        <div class="fund-input-group">
+                            <label for="fund1" class="form-label">Primer Fondo</label>
+                            <input type="text" id="fund1" name="fund1" 
+                                   class="form-control {% if error and 'fund1' in error %}is-invalid{% endif %}" 
+                                   placeholder="Ticker del primer fondo" 
+                                   value="{{ fund1 }}" required>
+                            {% if error and 'fund1' in error %}
+                            <div class="invalid-feedback">
+                                {{ error }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="fund-input-group">
+                            <label for="fund2" class="form-label">Segundo Fondo</label>
+                            <input type="text" id="fund2" name="fund2" 
+                                   class="form-control {% if error and 'fund2' in error %}is-invalid{% endif %}" 
+                                   placeholder="Ticker del segundo fondo" 
+                                   value="{{ fund2 }}" required>
+                            {% if error and 'fund2' in error %}
+                            <div class="invalid-feedback">
+                                {{ error }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Comparar Fondos</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-{% if comparison_table %}
-    <h2>Comparación entre {{ fund1 }} y {{ fund2 }}</h2>
-    {{ comparison_table|safe }}
-{% elif fund1 and fund2 %}
-    <p>No se pudo realizar la comparación.</p>
-{% endif %}
+        <!-- Mensajes de error -->
+        {% if error %}
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <svg class="error-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill" viewBox="0 0 16 16">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </svg>
+            <div>
+                {{ error }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Resultados de la comparación -->
+        {% if comparison_table %}
+        <div class="card">
+            <div class="card-header">
+                <h4>Comparación entre {{ fund1 }} y {{ fund2 }}</h4>
+            </div>
+            <div class="card-body">
+                {{ comparison_table|safe }}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bootstrap JS y Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

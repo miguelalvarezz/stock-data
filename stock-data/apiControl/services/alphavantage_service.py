@@ -7,8 +7,9 @@ class AlphaVantageService:
     def __init__(self):
         self.api_key = settings.ALPHA_VANTAGE_API_KEY
         self.base_url = "https://www.alphavantage.co/query"
+        
 
-    def get_historical_data(self, symbol: str) -> Dict[str, Any]:
+    def getHistoricalProfit(self, symbol: str, timeframe: str) -> Dict[str, Any]:
         """
         Obtiene datos históricos (backup de YFinance)
         """
@@ -24,20 +25,4 @@ class AlphaVantageService:
         except Exception as e:
             # Log del error
             return {}
-
-    def get_technical_metrics(self, symbol: str) -> Dict[str, Any]:
-        """
-        Obtiene métricas técnicas para gráficos
-        """
-        try:
-            params = {
-                'function': 'TECHNICAL_INDICATORS',
-                'symbol': symbol,
-                'apikey': self.api_key
-            }
-            response = requests.get(self.base_url, params=params)
-            response.raise_for_status()
-            return response.json()
-        except Exception as e:
-            # Log del error
-            return {}
+        
