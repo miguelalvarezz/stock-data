@@ -1,0 +1,72 @@
+<table class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th scope="col">Símbolo</th>
+      <th scope="col">Nombre</th>
+      <th scope="col" class="text-end">
+        <a href="?tab={{ tab }}&sort=price&order={% if sort == 'price' and order == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none text-dark">
+          Precio
+          {% if sort == 'price' %}
+            {% if order == 'asc' %}▲{% else %}▼{% endif %}
+          {% endif %}
+        </a>
+      </th>
+      <th scope="col" class="text-end">
+        <a href="?tab={{ tab }}&sort=changesPercentage&order={% if sort == 'changesPercentage' and order == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none text-dark">
+          Cambio %
+          {% if sort == 'changesPercentage' %}
+            {% if order == 'asc' %}▲{% else %}▼{% endif %}
+          {% endif %}
+        </a>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for stock in stocks %}
+      <tr>
+        <td>
+          <span class="badge rounded-pill" style="background-color: {% if stock.color %}{{ stock.color }}{% else %}#007bff{% endif %}; color: #fff; min-width: 48px;">
+            {% if stock.ticker %}
+              {{ stock.ticker }}
+            {% elif stock.symbol %}
+              {{ stock.symbol }}
+            {% else %}
+              N/A
+            {% endif %}
+          </span>
+        </td>
+        <td>
+          {% if stock.companyName %}
+            {{ stock.companyName }}
+          {% elif stock.name %}
+            {{ stock.name }}
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+        <td class="text-end">
+          {% if stock.price %}
+            {{ stock.price|floatformat:2 }} €
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+        <td class="text-end">
+          {% if stock.changesPercentage %}
+            {% with first_char=stock.changesPercentage|first %}
+              <span class="fw-bold {% if first_char == '+' %}text-success{% else %}text-danger{% endif %}">
+                {{ stock.changesPercentage }}
+              </span>
+            {% endwith %}
+          {% elif stock.changes %}
+            <span class="fw-bold text-danger">{{ stock.changes }}</span>
+          {% else %}
+            N/A
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="text-center">No hay datos disponibles.</td></tr>
+    {% endfor %}
+  </tbody>
+</table> 

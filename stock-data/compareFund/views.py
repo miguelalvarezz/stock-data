@@ -5,8 +5,8 @@ from apiControl.services.yfinance_service import YFinanceService
 
 
 def compare_view(request):
-    f1 = request.GET.get('fund1', '').strip()
-    f2 = request.GET.get('fund2', '').strip()
+    f1 = request.GET.get('fund1', '').strip().upper()
+    f2 = request.GET.get('fund2', '').strip().upper()
     
     print(f"[DEBUG] Fondos recibidos: fund1={f1}, fund2={f2}")
     
@@ -35,11 +35,20 @@ def compare_view(request):
         
         # Si ambos fondos existen, proceder con la comparación
         print(f"[DEBUG] Intentando comparar fondos: {f1} vs {f2}")
-        df = compare_fund(f1, f2)
+        df, price_series, profit_series, growth_last_year, growth_5y_avg = compare_fund(f1, f2)
         
         if not df.empty:
             comparison_table = df.to_html(classes="table table-bordered table-striped")
             context['comparison_table'] = comparison_table
+            context['price_series'] = price_series
+            context['profit_series'] = profit_series
+            context['growth_last_year'] = growth_last_year
+            context['growth_5y_avg'] = growth_5y_avg
+            # Pasar valores simples para el template
+            context['growth_last_year_fund1'] = growth_last_year.get(f1)
+            context['growth_last_year_fund2'] = growth_last_year.get(f2)
+            context['growth_5y_avg_fund1'] = growth_5y_avg.get(f1)
+            context['growth_5y_avg_fund2'] = growth_5y_avg.get(f2)
             print(f"[DEBUG] Tabla HTML generada: {comparison_table[:100]}...")
         else:
             context['error'] = "No se pudieron obtener datos para la comparación"

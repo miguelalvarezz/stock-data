@@ -16,11 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("searchFund/", include("searchFund.urls")),
     path("compareFund/", include("compareFund.urls")),
-    path("graphicFund/", include("graphicFund.urls")),
-    path("suggestedFund/", include("suggestedFund.urls")),
+    #path("graphicFund/", include("graphicFund.urls")),
+    #path("suggestedFund/", include("suggestedFund.urls")),
     path('admin/', admin.site.urls),
+    path('home/', include('home.urls')),
+    path('', RedirectView.as_view(url='/home/', permanent=False)),
 ]
+
+
+# Configuración para servir archivos media en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

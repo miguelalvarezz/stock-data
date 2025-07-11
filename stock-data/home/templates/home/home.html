@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .offcanvas-start {
+        width: 260px; /* Puedes ajustar el ancho */
+      }
+      .navbar-brand-center {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+      .navbar {
+        position: relative;
+      }
+    </style>
+</head>
+<body>
+<!-- Banner/Cabecera -->
+<nav class="navbar navbar-dark bg-primary shadow-sm">
+  <div class="container-fluid">
+    <!-- Menú hamburguesa a la izquierda -->
+    <button class="navbar-toggler me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasMenu" aria-controls="offcanvasMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- Offcanvas lateral -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasMenu" aria-labelledby="offcanvasMenuLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasMenuLabel">Menú Inicio</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="list-unstyled">
+          <li><a class="dropdown-item" href="/searchFund/">Buscar Fondos</a></li>
+          <li><a class="dropdown-item" href="/compareFund/">Comparar Fondos</a></li>
+          <li><a class="dropdown-item" href="/suggestedFund/">Fondos Sugeridos</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- Título centrado -->
+    <a class="navbar-brand mx-auto fw-bold navbar-brand-center" href="#">StockData</a>
+    <!-- Botón iniciar sesión a la derecha -->
+    <div class="d-flex ms-auto">
+      {% if user.is_authenticated %}
+      <div class="dropdown">
+        <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle"></i> {{ user.get_full_name }}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person"></i> Mi Perfil</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a></li>
+        </ul>
+      </div>
+    {% else %}
+      <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Iniciar sesión</a>
+      <a href="{% url 'register' %}" class="btn btn-light">Registrarse</a>
+    {% endif %}
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+    <h1 class="text-center">¡Bienvenido a StockData!</h1>
+    <p class="text-center">Esta es la página principal de StockData, disfruta de la experiencia.</p>
+    <div class="text-center mt-4">
+        <a href="/searchFund/" class="btn btn-primary">Buscar Fondos</a>
+    </div>
+
+    <!-- Tendencias de mercado -->
+    <div class="mt-5">
+      <h3 class="mb-3">Tendencias de mercado</h3>
+      {% if sort and order %}
+        <a href="/home/" class="btn btn-secondary mb-3">Restaurar Ordenación</a>
+      {% endif %}
+      <ul class="nav nav-pills mb-3" id="trendTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="most-active-tab" data-bs-toggle="pill" data-bs-target="#most-active" type="button" role="tab" aria-controls="most-active" aria-selected="true">Mayor actividad</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="gainers-tab" data-bs-toggle="pill" data-bs-target="#gainers" type="button" role="tab" aria-controls="gainers" aria-selected="false">Mayores subidas</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="losers-tab" data-bs-toggle="pill" data-bs-target="#losers" type="button" role="tab" aria-controls="losers" aria-selected="false">Mayores bajadas</button>
+        </li>
+      </ul>
+      <div class="tab-content" id="trendTabsContent">
+        <div class="tab-pane fade show active" id="most-active" role="tabpanel" aria-labelledby="most-active-tab">
+          {% include 'home/market_trends_table.html' with stocks=market_trends.most_active %}
+        </div>
+        <div class="tab-pane fade" id="gainers" role="tabpanel" aria-labelledby="gainers-tab">
+          {% include 'home/market_trends_table.html' with stocks=market_trends.gainers %}
+        </div>
+        <div class="tab-pane fade" id="losers" role="tabpanel" aria-labelledby="losers-tab">
+          {% include 'home/market_trends_table.html' with stocks=market_trends.losers %}
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS y Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - StockData</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .login-body {
+            padding: 2rem;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="login-container">
+                    <div class="login-header">
+                        <h2 class="mb-0">Iniciar Sesión</h2>
+                        <p class="mb-0 mt-2">Accede a tu cuenta de StockData</p>
+                    </div>
+                    <div class="login-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">Correo electrónico</label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.username.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
+                                {{ form.password }}
+                                {% if form.password.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                            </div>
+                        </form>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">¿No tienes una cuenta? <a href="{% url 'register' %}" class="text-decoration-none">Regístrate aquí</a></p>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <a href="{% url 'home' %}" class="text-decoration-none">
+                                <i class="bi bi-arrow-left"></i> Volver al inicio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

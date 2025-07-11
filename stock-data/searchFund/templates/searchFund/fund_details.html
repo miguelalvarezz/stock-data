@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalles del fondo: {{ symbol }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .titulo-fondo {
+        font-size: 1.5rem; /* Disminuido respecto al h2 normal */
+        font-weight: 500;
+      }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+  <h2 class="mb-4 text-center titulo-fondo">Detalles del fondo: {{ symbol }}</h2>
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10 col-12">
+      <div class="table-responsive mb-4">
+        <table class="table table-striped table-bordered">
+          <tbody>
+            {% for key, value in details.items %}
+              <tr>
+                <th style="text-align: left; width: 40%;">{{ key }}</th>
+                <td style="text-align: right;">{{ value }}</td>
+              </tr>
+            {% endfor %}
+            {% if growth_last_year %}
+              <tr>
+                <th style="text-align: left;">Crecimiento del último año</th>
+                <td style="text-align: right;">
+                  <span class="fw-bold {% if growth_last_year > 0 %}text-success{% elif growth_last_year < 0 %}text-danger{% endif %}">
+                    {{ growth_last_year|floatformat:2 }} %
+                  </span>
+                </td>
+              </tr>
+            {% endif %}
+            {% if growth_5y_avg %}
+              <tr>
+                <th style="text-align: left;">Crecimiento medio anual últimos 5 años (CAGR)</th>
+                <td style="text-align: right;">
+                  <span class="fw-bold {% if growth_5y_avg > 0 %}text-success{% elif growth_5y_avg < 0 %}text-danger{% endif %}">
+                    {{ growth_5y_avg|floatformat:2 }} %
+                  </span>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+      {% if line_data %}
+        <div class="border p-3 bg-light shadow-sm rounded w-100 text-center mb-4">
+          <h5 class="mb-3">Histórico de precios (línea) Interactivo</h5>
+          <div id="line-chart" style="height:400px;"></div>
+          <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+          {{ line_data|json_script:"line-data-json" }}
+          <script>
+            const lineData = JSON.parse(document.getElementById('line-data-json').textContent);
+            const trace = {
+              x: lineData.dates,
+              y: lineData.prices,
+              type: 'scatter',
+              mode: 'lines',
+              name: 'Precio',
+              line: {color: '#007bff'}
+            };
+            const layout = {
+              title: '',
+              xaxis: { title: 'Fecha' },
+              yaxis: { title: 'Precio' },
+              margin: {l: 40, r: 40, t: 20, b: 40},
+              template: 'plotly_white',
+              height: 400
+            };
+            Plotly.newPlot('line-chart', [trace], layout);
+          </script>
+        </div>
+      {% endif %}
+      {% if candlestick_data %}
+        <div class="border p-3 bg-light shadow-sm rounded w-100 text-center mb-4">
+          <h5 class="mb-3">Gráfico de Velas Japonesas (OHLC) Interactivo</h5>
+          <div id="candlestick-chart" style="height:600px;"></div>
+          <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+          {{ candlestick_data|json_script:"candlestick-data-json" }}
+          <script>
+            const candleData = JSON.parse(document.getElementById('candlestick-data-json').textContent);
+            const traceCandle = {
+              x: candleData.dates,
+              open: candleData.open,
+              high: candleData.high,
+              low: candleData.low,
+              close: candleData.close,
+              type: 'candlestick',
+              name: 'OHLC',
+              increasing: {line: {color: '#28a745'}},
+              decreasing: {line: {color: '#dc3545'}}
+            };
+            const traceVol = {
+              x: candleData.dates,
+              y: candleData.volume,
+              type: 'bar',
+              yaxis: 'y2',
+              marker: {color: 'rgba(150, 150, 255, 0.3)'},
+              name: 'Volumen'
+            };
+            const layoutCandle = {
+              title: '',
+              xaxis: { title: 'Fecha', rangeslider: {visible: true} },
+              yaxis: { title: 'Precio' },
+              yaxis2: {
+                title: 'Volumen',
+                overlaying: 'y',
+                side: 'right',
+                showgrid: false
+              },
+              height: 600,
+              margin: {l: 40, r: 40, t: 20, b: 40},
+              template: 'plotly_white',
+              legend: {orientation: 'h', yanchor: 'bottom', y: 1.02, xanchor: 'right', x: 1}
+            };
+            Plotly.newPlot('candlestick-chart', [traceCandle, traceVol], layoutCandle);
+          </script>
+        </div>
+      {% endif %}
+      {% if not line_data and not candlestick_data %}
+        <p class="text-center">No hay datos históricos disponibles para este fondo.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - StockData</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        .profile-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .profile-body {
+            padding: 2rem;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        .profile-picture {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+        }
+        .user-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <h2 class="mb-0">Mi Perfil</h2>
+                        <p class="mb-0 mt-2">Gestiona tu información personal</p>
+                    </div>
+                    <div class="profile-body">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <!-- Información del usuario -->
+                        <div class="user-info text-center">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="Foto de perfil" class="profile-picture mb-3">
+                            {% else %}
+                                <div class="profile-picture mb-3 mx-auto d-flex align-items-center justify-content-center bg-secondary text-white">
+                                    <i class="bi bi-person-fill" style="font-size: 2rem;"></i>
+                                </div>
+                            {% endif %}
+                            <h4>{{ user.get_full_name }}</h4>
+                            <p class="text-muted mb-0">{{ user.email }}</p>
+                            <small class="text-muted">Miembro desde {{ user.created_at|date:"F Y" }}</small>
+                        </div>
+                        
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">Nombre</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.first_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">Apellidos</label>
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.last_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">Correo electrónico</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">Fecha de nacimiento</label>
+                                    {{ form.date_of_birth }}
+                                    {% if form.date_of_birth.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.date_of_birth.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.phone_number.id_for_label }}" class="form-label">Número de teléfono</label>
+                                    {{ form.phone_number }}
+                                    {% if form.phone_number.errors %}
+                                        <div class="text-danger small">
+                                            {% for error in form.phone_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.bio.id_for_label }}" class="form-label">Biografía</label>
+                                {{ form.bio }}
+                                {% if form.bio.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.bio.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.profile_picture.id_for_label }}" class="form-label">Foto de perfil</label>
+                                {{ form.profile_picture }}
+                                {% if form.profile_picture.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.profile_picture.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
+                            </div>
+                        </form>
+                        
+                        <div class="text-center">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-house"></i> Volver al inicio
+                            </a>
+                            <a href="{% url 'logout' %}" class="btn btn-outline-danger">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
