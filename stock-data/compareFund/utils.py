@@ -11,13 +11,42 @@ from apiControl.exceptions.apiException import APIError
 
 def calculate_fund_rating(data):
 
-    rentabilidad = data.get("historicalProfit")
-    volatilidad = data.get("anualVolatility")
+    # Obtener rentabilidad histórica
+    hist_data = data.get("historicalProfit")
+    if hist_data and isinstance(hist_data, dict) and 'prices' in hist_data and hist_data['prices']:
+        # Calcular rentabilidad total desde el primer precio hasta el último
+        prices = hist_data['prices']
+        if len(prices) >= 2:
+            initial_price = prices[0]
+            final_price = prices[-1]
+            if initial_price != 0:
+                rentabilidad = ((final_price / initial_price) - 1) * 100
+            else:
+                rentabilidad = None
+        else:
+            rentabilidad = None
+    else:
+        rentabilidad = None
 
-    if rentabilidad is None or volatilidad is None:
+    # Obtener volatilidad anual
+    volatilidad_data = data.get("anualVolatility")
+    if volatilidad_data:
+        if isinstance(volatilidad_data, str) and '%' in volatilidad_data:
+            # Extraer el número del string "15.23%"
+            try:
+                volatilidad = float(volatilidad_data.replace('%', ''))
+            except ValueError:
+                volatilidad = None
+        elif isinstance(volatilidad_data, (int, float)):
+            volatilidad = volatilidad_data
+        else:
+            volatilidad = None
+    else:
+        volatilidad = None
+
+    # Si no tenemos datos suficientes, devolver 5 estrellas vacías
+    if rentabilidad is None or volatilidad is None or volatilidad == 0:
         return "☆☆☆☆☆"
-        #raise APIError("No se puede calcular rating sin rentabilidad y volatilidad")
-        
 
     # mayor rentabilidad y menor riesgo = mejor rating
     score = (rentabilidad / volatilidad) * 100
@@ -46,7 +75,7 @@ def compare_fund(symbol1, symbol2):
     error = {}
     # Series para graficar
     price_series = {}
-    profit_series = {}
+    annual_returns_series = {}  # Nuevo: para rentabilidades anuales
     growth_last_year = {}
     growth_5y_avg = {}
 
@@ -69,10 +98,6 @@ def compare_fund(symbol1, symbol2):
             # Rentabilidad acumulada (desde el primer valor)
             base = df1['Precio'].iloc[0]
             df1['Rentabilidad'] = (df1['Precio'] / base - 1) * 100
-            profit_series[symbol1] = {
-                'dates': df1['Fecha'].dt.strftime('%Y-%m-%d').tolist(),
-                'profit': df1['Rentabilidad'].tolist(),
-            }
             # Crecimiento último año
             now = pd.Timestamp.now()
             one_year_ago = now - pd.DateOffset(years=1)
@@ -109,10 +134,6 @@ def compare_fund(symbol1, symbol2):
             }
             base = df2['Precio'].iloc[0]
             df2['Rentabilidad'] = (df2['Precio'] / base - 1) * 100
-            profit_series[symbol2] = {
-                'dates': df2['Fecha'].dt.strftime('%Y-%m-%d').tolist(),
-                'profit': df2['Rentabilidad'].tolist(),
-            }
             now = pd.Timestamp.now()
             one_year_ago = now - pd.DateOffset(years=1)
             df2['diff'] = (df2['Fecha'] - one_year_ago).abs()
@@ -138,6 +159,26 @@ def compare_fund(symbol1, symbol2):
                 growth_5y_avg[symbol2] = None
         data1['historicalProfit'] = hist1
         data2['historicalProfit'] = hist2
+        
+        # Obtener rentabilidades anuales para el nuevo gráfico
+        print(f"[DEBUG] Obteniendo rentabilidades anuales para {symbol1}")
+        annual_returns1 = perform_api_call("compare", symbol1, "annualReturns")
+        if annual_returns1 and 'annual_returns' in annual_returns1:
+            years_sorted1 = sorted(annual_returns1['annual_returns'].keys())
+            annual_returns_series[symbol1] = {
+                'years': [int(year) for year in years_sorted1],
+                'returns': [float(annual_returns1['annual_returns'][year]['return']) for year in years_sorted1]
+            }
+        
+        print(f"[DEBUG] Obteniendo rentabilidades anuales para {symbol2}")
+        annual_returns2 = perform_api_call("compare", symbol2, "annualReturns")
+        if annual_returns2 and 'annual_returns' in annual_returns2:
+            years_sorted2 = sorted(annual_returns2['annual_returns'].keys())
+            annual_returns_series[symbol2] = {
+                'years': [int(year) for year in years_sorted2],
+                'returns': [float(annual_returns2['annual_returns'][year]['return']) for year in years_sorted2]
+            }
+            
     except APIError as e:
         print(f"[ERROR] Error en rentabilidad histórica: {str(e)}")
         error["historicalProfit"] = str(e)
@@ -145,22 +186,49 @@ def compare_fund(symbol1, symbol2):
     # Volatilidad anual
     try:
         print(f"[DEBUG] Obteniendo volatilidad anual para {symbol1}")
+
+        '''
         data1["anualVolatility"] = perform_api_call("compare", symbol1, "anualVolatility")
         print(f"[DEBUG] Obteniendo volatilidad anual para {symbol2}")
         data2["anualVolatility"] = perform_api_call("compare", symbol2, "anualVolatility")
+        '''
+
+        # Para symbol1
+        anual_vol1 = perform_api_call("compare", symbol1, "anualVolatility")
+        if isinstance(anual_vol1, dict) and 'volatility' in anual_vol1:
+            data1["anualVolatility"] = f"{anual_vol1['volatility']:.2f}%"
+        else:
+            data1["anualVolatility"] = "N/A"
+
+        # Para symbol2
+        anual_vol2 = perform_api_call("compare", symbol2, "anualVolatility")
+        if isinstance(anual_vol2, dict) and 'volatility' in anual_vol2:
+            data2["anualVolatility"] = f"{anual_vol2['volatility']:.2f}%"
+        else:
+            data2["anualVolatility"] = "N/A"
+        
     except APIError as e:
         print(f"[ERROR] Error en volatilidad anual: {str(e)}")
         error["anualVolatility"] = str(e)
 
-    # Comisiones y gastos
+    # Capitalización de mercado
     try:
-        print(f"[DEBUG] Obteniendo comisiones para {symbol1}")
-        data1["commissions"] = perform_api_call("compare", symbol1, "commissions")
-        print(f"[DEBUG] Obteniendo comisiones para {symbol2}")
-        data2["commissions"] = perform_api_call("compare", symbol2, "commissions")
+        print(f"[DEBUG] Obteniendo market cap para {symbol1}")
+        market_cap1 = perform_api_call("compare", symbol1, "marketCap")
+        if isinstance(market_cap1, dict) and 'formatted_market_cap' in market_cap1:
+            data1["marketCap"] = market_cap1['formatted_market_cap']
+        else:
+            data1["marketCap"] = "N/A"
+            
+        print(f"[DEBUG] Obteniendo market cap para {symbol2}")
+        market_cap2 = perform_api_call("compare", symbol2, "marketCap")
+        if isinstance(market_cap2, dict) and 'formatted_market_cap' in market_cap2:
+            data2["marketCap"] = market_cap2['formatted_market_cap']
+        else:
+            data2["marketCap"] = "N/A"
     except APIError as e:
-        print(f"[ERROR] Error en comisiones: {str(e)}")
-        error["commissions"] = str(e)
+        print(f"[ERROR] Error en market cap: {str(e)}")
+        error["marketCap"] = str(e)
 
     # Categoria/sector
     try:
@@ -184,9 +252,15 @@ def compare_fund(symbol1, symbol2):
         data1['rating'] = None
         data2['rating'] = None
 
-    print(f"[DEBUG] Datos finales para {symbol1}: {data1}")
-    print(f"[DEBUG] Datos finales para {symbol2}: {data2}")
+    # print(f"[DEBUG] Datos finales para {symbol1}: {data1}")
+    # print(f"[DEBUG] Datos finales para {symbol2}: {data2}")
     print(f"[DEBUG] Errores encontrados: {error}")
+    
+    # Prints útiles para debug sin saturar la terminal
+    print(f"[DEBUG] {symbol1} - Volatilidad: {data1.get('anualVolatility', 'N/A')}, Market Cap: {data1.get('marketCap', 'N/A')}")
+    print(f"[DEBUG] {symbol2} - Volatilidad: {data2.get('anualVolatility', 'N/A')}, Market Cap: {data2.get('marketCap', 'N/A')}")
+    print(f"[DEBUG] Annual returns series keys: {list(annual_returns_series.keys())}")
+    print(f"[DEBUG] Annual returns series content: {annual_returns_series}")
 
     # Crear DataFrame con los resultados
     df = pd.DataFrame([data1, data2], index=[symbol1, symbol2])
@@ -194,4 +268,4 @@ def compare_fund(symbol1, symbol2):
         df = df.drop(columns=['historicalProfit'])
     df.fillna("N/A", inplace=True)
     print(f"[DEBUG] DataFrame final:\n{df}")
-    return df, price_series, profit_series, growth_last_year, growth_5y_avg
+    return df, price_series, annual_returns_series, growth_last_year, growth_5y_avg

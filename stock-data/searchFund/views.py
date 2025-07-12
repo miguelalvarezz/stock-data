@@ -16,6 +16,26 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from .utils import search_fund_data, get_recommended_funds_by_sector
 
+def get_fund_sector(symbol):
+    """
+    Función auxiliar para obtener el sector de un fondo de manera consistente
+    """
+    try:
+        sector_data = perform_api_call("compare", symbol, "categorySector")
+        if sector_data:
+            # Manejar el sector de manera consistente con compare
+            if isinstance(sector_data, dict):
+                # Si es un diccionario (como devuelve FMP), usar 'category'
+                return sector_data.get('category')
+            else:
+                # Si es un string directo (como devuelve YFinance), usarlo tal cual
+                return sector_data
+        else:
+            return None
+    except Exception as e:
+        print(f"Error obteniendo sector para {symbol}: {str(e)}")
+        return None
+
 def search_view(request):
     context = {
         'query': None,
@@ -42,6 +62,20 @@ def search_view(request):
                     if results:
                         # Limitar a 5 resultados máximo
                         results = results[:5]
+
+                        # Obtener sector para cada fondo
+                        for result in results:
+                            try:
+                                symbol = result.get('symbol')
+                                if symbol:
+                                    sector = get_fund_sector(symbol)
+                                    if sector:
+                                        result['sector'] = sector
+                                    else:
+                                        result['sector'] = None
+                            except Exception as e:
+                                print(f"Error obteniendo sector para {symbol}: {str(e)}")
+                                result['sector'] = None
                         
                         # Si los resultados vienen de la búsqueda por nombre, mostrar mensaje informativo
                         if all('price' not in r and 'change_percent' not in r and 'volume' not in r for r in results):
@@ -88,6 +122,9 @@ def fund_details_view(request, symbol):
     details = perform_api_call("search", symbol)
     if isinstance(details, list):
         details = details[0] if details else {}
+
+    # Obtener sector del fondo
+    sector = get_fund_sector(symbol)
 
     hist_data = perform_api_call("compare", symbol, "historicalProfit")
     df = None
@@ -149,6 +186,7 @@ def fund_details_view(request, symbol):
     context = {
         'symbol': symbol,
         'details': details,
+        'sector': sector,  # Agregar el sector al contexto
         'df': df,
         'line_data': line_data,
         'candlestick_data': candlestick_data,

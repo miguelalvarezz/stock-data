@@ -25,7 +25,7 @@ class IntegrationTests(TestCase):
         
         # Verificar que compare tiene todos los campos necesarios
         compare_config = API_MAPPING['compare']
-        required_fields = ['historicalProfit', 'anualVolatility', 'commissions', 'categorySector']
+        required_fields = ['historicalProfit', 'anualVolatility', 'marketCap', 'categorySector']
         
         for field in required_fields:
             self.assertIn(field, compare_config)
@@ -224,23 +224,21 @@ class DataValidationTests(TestCase):
                 self.assertIn(key, item)
                 self.assertIsInstance(item[key], str)
 
-    def test_commission_data_structure(self):
-        """Test para validar estructura de datos de comisiones"""
-        with patch('apiControl.control.FMPService') as mock_fmp_class:
-            mock_fmp_instance = MagicMock()
-            mock_fmp_instance.getCommissions.return_value = {
-                'expense_ratio': 0.02,
-                'total_assets': 1000000000,
-                'ytd_return': 0.15,
-                'fund_family': 'Vanguard'
+    def test_market_cap_data_structure(self):
+        """Test para validar estructura de datos de market cap"""
+        with patch('apiControl.control.YFinanceService.getMarketCap') as mock_market_cap:
+            mock_market_cap.return_value = {
+                'market_cap': 2500000000000,
+                'formatted_market_cap': '$2.50T',
+                'symbol': 'AAPL'
             }
-            mock_fmp_class.return_value = mock_fmp_instance
             
-            result = perform_api_call('compare', 'VTI', 'commissions')
+            result = perform_api_call('compare', 'AAPL', 'marketCap')
             
             # Verificar estructura
             self.assertIsNotNone(result)
-            self.assertIn('expense_ratio', result)
-            self.assertIn('total_assets', result)
-            self.assertIn('ytd_return', result)
-            self.assertIn('fund_family', result) 
+            self.assertIn('market_cap', result)
+            self.assertIn('formatted_market_cap', result)
+            self.assertIn('symbol', result)
+            self.assertIsInstance(result['market_cap'], (int, float))
+            self.assertIsInstance(result['formatted_market_cap'], str) 

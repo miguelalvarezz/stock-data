@@ -34,12 +34,18 @@ API_MAPPING = {
             "primary": YFinanceService.getHistoricalProfit,
         #    "backup": AlphaVantageService.getHistoricalProfit,
         },
+        "annualReturns": {
+            "primary": lambda symbol: YFinanceService.calculateAnnualReturns(
+                YFinanceService.getHistoricalProfit(symbol)
+            ),
+        },
         "anualVolatility": {
             "primary": YFinanceService.getAnualVolatility,
+            #"primary": generic_search,
             #"backup": FMPService.getAnualVolatility,
         },
-        "commissions": {
-            "primary": lambda symbol: FMPService().getCommissions(symbol),
+        "marketCap": {
+            "primary": YFinanceService.getMarketCap,
         },
         "categorySector": {
             "primary": lambda symbol: FMPService().getCategorySector(symbol),           # ACTUALMENTE NO FUNCIONA

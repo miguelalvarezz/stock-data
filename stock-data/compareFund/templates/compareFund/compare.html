@@ -100,39 +100,44 @@
             <div class="card-body">
                 <!-- Tabla de comparación -->
                 {{ comparison_table|safe }}
-                <!-- Gráfico de Rentabilidad -->
-                <div class="mb-4 mt-4">
-                    <h5>Rentabilidad histórica (%)</h5>
-                    <div id="profitChart" style="height: 350px;"></div>
-                </div>
-                <!-- Gráfico de Precio Histórico -->
-                <div class="mb-4">
-                    <h5>Precio histórico</h5>
-                    <div id="priceChart" style="height: 350px;"></div>
-                </div>
                 <!-- Tabla personalizada de crecimientos -->
                 <div class="mt-3">
                     <table class="table table-bordered table-striped">
                         <thead>
                             <tr>
                                 <th></th>
-                                <th>{{ fund1 }}</th>
-                                <th>{{ fund2 }}</th>
+                                <th class="text-center">Crecimiento último año</th>
+                                <th class="text-center">Crecimiento medio anual 5 años</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><b>Crecimiento último año</b></td>
-                                <td>{% if growth_last_year_fund1 is not None %}{{ growth_last_year_fund1|floatformat:2 }}%{% else %}N/A{% endif %}</td>
-                                <td>{% if growth_last_year_fund2 is not None %}{{ growth_last_year_fund2|floatformat:2 }}%{% else %}N/A{% endif %}</td>
+                                <td><b>{{ fund1 }}</b></td>
+                                <td class="text-center">{% if growth_last_year_fund1 is not None %}{{ growth_last_year_fund1|floatformat:2 }}%{% else %}N/A{% endif %}</td>
+                                <td class="text-center">{% if growth_5y_avg_fund1 is not None %}{{ growth_5y_avg_fund1|floatformat:2 }}%{% else %}N/A{% endif %}</td>
                             </tr>
                             <tr>
-                                <td><b>Crecimiento medio anual 5 años</b></td>
-                                <td>{% if growth_5y_avg_fund1 is not None %}{{ growth_5y_avg_fund1|floatformat:2 }}%{% else %}N/A{% endif %}</td>
-                                <td>{% if growth_5y_avg_fund2 is not None %}{{ growth_5y_avg_fund2|floatformat:2 }}%{% else %}N/A{% endif %}</td>
+                                <td><b>{{ fund2 }}</b></td>
+                                <td class="text-center">{% if growth_last_year_fund2 is not None %}{{ growth_last_year_fund2|floatformat:2 }}%{% else %}N/A{% endif %}</td>
+                                <td class="text-center">{% if growth_5y_avg_fund2 is not None %}{{ growth_5y_avg_fund2|floatformat:2 }}%{% else %}N/A{% endif %}</td>
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <style>
+                    .table th.text-center, .table td.text-center {
+                        text-align: center !important;
+                    }
+                </style>
+                <!-- Gráfico de Rentabilidades Anuales -->
+                <div class="mb-4 mt-4">
+                    <h5>Rentabilidades Anuales (%)</h5>
+                    <div id="annualReturnsChart" style="height: 350px;"></div>
+                </div>
+                <!-- Gráfico de Precio Histórico -->
+                <div class="mb-4">
+                    <h5>Precio histórico</h5>
+                    <div id="priceChart" style="height: 350px;"></div>
                 </div>
             </div>
         </div>
@@ -145,24 +150,9 @@
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
-    {% if profit_series and price_series %}
-        // Datos para el gráfico de rentabilidad
-        const profitSeries = {{ profit_series|safe }};
-        const priceSeries = {{ price_series|safe }};
-        // Gráfico de rentabilidad
-        const profitData = Object.keys(profitSeries).map(symbol => ({
-            x: profitSeries[symbol].dates,
-            y: profitSeries[symbol].profit,
-            mode: 'lines',
-            name: symbol
-        }));
-        Plotly.newPlot('profitChart', profitData, {
-            xaxis: { title: 'Fecha' },
-            yaxis: { title: 'Rentabilidad (%)' },
-            legend: { orientation: 'h' },
-            margin: { t: 30 }
-        }, {responsive: true});
+    {% if price_series %}
         // Gráfico de precio histórico
+        const priceSeries = {{ price_series|safe }};
         const priceData = Object.keys(priceSeries).map(symbol => ({
             x: priceSeries[symbol].dates,
             y: priceSeries[symbol].prices,
@@ -174,6 +164,44 @@
             yaxis: { title: 'Precio' },
             legend: { orientation: 'h' },
             margin: { t: 30 }
+        }, {responsive: true});
+    {% endif %}
+    
+    {% if annual_returns_series %}
+        // Gráfico de rentabilidades anuales (mejorado)
+        const annualReturnsSeries = {{ annual_returns_series|safe }};
+        // Unir todos los años de todos los fondos y ordenarlos sin duplicados
+        let allYears = [];
+        Object.values(annualReturnsSeries).forEach(s => allYears = allYears.concat(s.years));
+        allYears = Array.from(new Set(allYears)).sort((a, b) => a - b);
+        // Unir todos los valores para calcular el rango
+        let allReturns = [];
+        Object.values(annualReturnsSeries).forEach(s => allReturns = allReturns.concat(s.returns));
+        // Redondear el mínimo hacia abajo y el máximo hacia arriba al múltiplo de 5 más cercano
+        const minY = Math.floor(Math.min(...allReturns, 0) / 5) * 5;
+        const maxY = Math.ceil(Math.max(...allReturns, 0) / 5) * 5;
+        // Datos para el gráfico
+        const annualReturnsData = Object.keys(annualReturnsSeries).map(symbol => ({
+            x: annualReturnsSeries[symbol].years,
+            y: annualReturnsSeries[symbol].returns,
+            mode: 'lines+markers',
+            name: symbol,
+            type: 'scatter'
+        }));
+        Plotly.newPlot('annualReturnsChart', annualReturnsData, {
+            xaxis: {
+                title: 'Año',
+                tickmode: 'array',
+                tickvals: allYears,
+                ticktext: allYears.map(String)
+            },
+            yaxis: {
+                title: 'Rentabilidad Anual (%)',
+                range: [minY, maxY]
+            },
+            legend: { orientation: 'h' },
+            margin: { t: 30 },
+            hovermode: 'x unified'
         }, {responsive: true});
     {% endif %}
     </script>

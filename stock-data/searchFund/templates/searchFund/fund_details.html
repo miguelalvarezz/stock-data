@@ -20,11 +20,19 @@
         <table class="table table-striped table-bordered">
           <tbody>
             {% for key, value in details.items %}
+              {% if key != 'sector' %}
               <tr>
                 <th style="text-align: left; width: 40%;">{{ key }}</th>
                 <td style="text-align: right;">{{ value }}</td>
               </tr>
+              {% endif %}
             {% endfor %}
+            {% if sector %}
+              <tr>
+                <th style="text-align: left;">Sector</th>
+                <td style="text-align: right;">{{ sector }}</td>
+              </tr>
+            {% endif %}
             {% if growth_last_year %}
               <tr>
                 <th style="text-align: left;">Crecimiento del último año</th>

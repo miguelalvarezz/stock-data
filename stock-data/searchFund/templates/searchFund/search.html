@@ -109,8 +109,7 @@
                                 <th>Precio</th>
                                 <th>Cambio %</th>
                                 <th>Volumen</th>
-                                <th>Ratios de Riesgo</th>
-                                <th>Comisiones</th>
+                                <th>Sector</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -122,28 +121,7 @@
                                 <td>{{ fund.price|default:"N/A" }}</td>
                                 <td>{{ fund.change_percent|default:"N/A" }}</td>
                                 <td>{{ fund.volume|default:"N/A" }}</td>
-                                <td>
-                                    {% if fund.risk_ratios %}
-                                    <ul class="list-unstyled">
-                                        {% for ratio, value in fund.risk_ratios.items %}
-                                        <li><small>{{ ratio }}: {{ value }}</small></li>
-                                        {% endfor %}
-                                    </ul>
-                                    {% else %}
-                                    N/A
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if fund.fees %}
-                                    <ul class="list-unstyled">
-                                        {% for fee, value in fund.fees.items %}
-                                        <li><small>{{ fee }}: {{ value }}</small></li>
-                                        {% endfor %}
-                                    </ul>
-                                    {% else %}
-                                    N/A
-                                    {% endif %}
-                                </td>
+                                <td>{{ fund.sector|default:"N/A" }}</td>
                                 <td>
                                     <a href="{% url 'fund_details' fund.symbol %}" class="btn btn-info btn-sm">Detalles</a>
                                 </td>

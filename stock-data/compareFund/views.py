@@ -35,13 +35,13 @@ def compare_view(request):
         
         # Si ambos fondos existen, proceder con la comparación
         print(f"[DEBUG] Intentando comparar fondos: {f1} vs {f2}")
-        df, price_series, profit_series, growth_last_year, growth_5y_avg = compare_fund(f1, f2)
+        df, price_series, annual_returns_series, growth_last_year, growth_5y_avg = compare_fund(f1, f2)
         
         if not df.empty:
             comparison_table = df.to_html(classes="table table-bordered table-striped")
             context['comparison_table'] = comparison_table
             context['price_series'] = price_series
-            context['profit_series'] = profit_series
+            context['annual_returns_series'] = annual_returns_series
             context['growth_last_year'] = growth_last_year
             context['growth_5y_avg'] = growth_5y_avg
             # Pasar valores simples para el template
