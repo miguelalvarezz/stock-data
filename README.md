@@ -30,6 +30,36 @@ Plataforma de visualización y comparación de fondos de inversión y acciones d
   - Personalización de perfil
   - Redireccionamiento a las demás funcionalidades
 
+## Despliegue
+### Opción 1
+Ambos integrantes del grupo hemos realizado el despliegue mediante el comando "Dev Containers: Rebuild and Reopen in Container" de la librería Dev Containers. Una vez dentro del contenedor ejecutaremos los siguientes comandos: 
+```bash
+cd /stock-data
+python manage.py runserver 0.0.0.0:800
+```
+Si fuera necesario realizar migraciones simplemente realizaremos el siguiente comando antes de correr el servidor:
+```bash
+python manage.py migrate
+```
+
+### Opción 2
+Existe la posibilidad de realizar el despliegue de otra forma para el que nuestro proyecto está, también, preparado para ejecutar.  
+Desde la terminal del proyecto ejecutaremos los siguiente comandos:
+```bash
+   cd .devcontainer
+   docker-compose up --build
+```
+En una nueva terminal entraremos al contenedor:
+```bash
+   docker exec -it devcontainer-app-1 bash
+```
+Una vez dentro del contenedor ralizaremos los mismos comandos que en la opción 1:
+```bash
+   cd /workspace/stock-data
+   python manage.py migrate
+   python manage.py runserver 0.0.0.0:8000
+```
+
 ## Cómo ejecutar
 ### Enlaces para probar el proyecto:
 - http://localhost:8000/home/

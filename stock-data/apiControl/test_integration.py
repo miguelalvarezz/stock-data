@@ -10,10 +10,10 @@ from .exceptions.apiException import APIError
 
 
 class IntegrationTests(TestCase):
-    """Tests de integración para verificar el funcionamiento completo del sistema"""
+    """Verificar el funcionamiento completo del sistema"""
 
     def test_api_mapping_completeness(self):
-        """Test para verificar que API_MAPPING tiene todas las configuraciones necesarias"""
+        #Test para verificar que API_MAPPING tiene todas las configuraciones necesarias
         # Verificar estructura básica
         self.assertIn('search', API_MAPPING)
         self.assertIn('compare', API_MAPPING)
@@ -33,7 +33,7 @@ class IntegrationTests(TestCase):
             self.assertTrue(callable(compare_config[field]['primary']))
 
     def test_generic_search_integration(self):
-        """Test de integración para generic_search"""
+        #Test de integración para generic_search
         # Test con símbolo válido
         with patch('apiControl.control.YFinanceService.getSearchData') as mock_yfinance:
             mock_yfinance.return_value = [{'symbol': 'AAPL', 'name': 'Apple Inc.'}]
@@ -46,7 +46,7 @@ class IntegrationTests(TestCase):
             self.assertEqual(result[0]['symbol'], 'AAPL')
 
     def test_perform_api_call_integration(self):
-        """Test de integración para perform_api_call"""
+        #Test de integración para perform_api_call
         # Test con historicalProfit
         with patch('apiControl.control.YFinanceService.getHistoricalProfit') as mock_historical:
             mock_historical.return_value = {
@@ -63,7 +63,7 @@ class IntegrationTests(TestCase):
             # No verificamos longitud específica porque puede variar con datos reales
 
     def test_error_handling_integration(self):
-        """Test de integración para el manejo de errores"""
+        #Test de integración para el manejo de errores
         # Test con acción inválida
         with self.assertRaises(APIError) as context:
             perform_api_call('invalid_action', 'AAPL')
@@ -77,7 +77,7 @@ class IntegrationTests(TestCase):
         self.assertIsInstance(context.exception, APIError)
 
     def test_backup_service_integration(self):
-        """Test de integración para servicios de backup"""
+        #Test de integración para servicios de backup
         # Test categorySector sin mocks para verificar comportamiento real
         result = perform_api_call('compare', 'AAPL', 'categorySector')
         
@@ -87,7 +87,7 @@ class IntegrationTests(TestCase):
 
 
 class EdgeCaseTests(TestCase):
-    """Tests para casos edge y límites"""
+    #Tests para casos edge y límites
 
     def test_empty_symbol_handling(self):
         """Test para manejo de símbolos vacíos"""
@@ -100,7 +100,7 @@ class EdgeCaseTests(TestCase):
             self.assertIsNone(result)
 
     def test_none_symbol_handling(self):
-        """Test para manejo de símbolos None"""
+        #Test para manejo de símbolos None
         # El código actual no maneja None correctamente, así que verificamos el comportamiento real
         result = generic_search(None)
         
@@ -108,7 +108,7 @@ class EdgeCaseTests(TestCase):
         self.assertIsInstance(result, list)
 
     def test_special_characters_in_symbol(self):
-        """Test para símbolos con caracteres especiales"""
+        #Test para símbolos con caracteres especiales
         with patch('apiControl.control.YFinanceService.getSearchData') as mock_yfinance:
             mock_yfinance.side_effect = Exception("Invalid symbol")
             

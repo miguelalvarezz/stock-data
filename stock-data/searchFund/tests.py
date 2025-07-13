@@ -38,6 +38,7 @@ class FundDetailsViewTest(TestCase):
     def test_fund_details_view_success(self, mock_perform_api_call):
         # Datos de un fondo
         mock_details = {'symbol': 'AMZN', 'name': 'Amazon'}
+        mock_sector_data = {'category': 'Technology'}  # Datos del sector
         mock_hist_data = {
             'dates': ['2023-01-01', '2023-12-31'],
             'prices': [100.0, 150.0],
@@ -47,7 +48,8 @@ class FundDetailsViewTest(TestCase):
             'close': [105.0, 155.0],
             'volumes': [1000, 2000]
         }
-        mock_perform_api_call.side_effect = [mock_details, mock_hist_data]
+        # Configurar el mock para devolver 3 valores: details, sector, hist_data
+        mock_perform_api_call.side_effect = [mock_details, mock_sector_data, mock_hist_data]
         
         response = self.client.get('/searchFund/details/AMZN/')
         self.assertEqual(response.status_code, 200)
